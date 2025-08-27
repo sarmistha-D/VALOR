@@ -13,7 +13,7 @@
 ## 🎯 Highlights
 
 <div align="center">
-  <img src="Architecture.png" alt="VALOR Architecture" width="800"/>
+  <img src="valor_architecture.png" alt="VALOR Architecture" width="800"/>
   <br>
   <strong>Figure: VALOR Architecture Overview</strong><br>
   <em>The complete VALOR framework showing multimodal encoders, Chain-of-Thought experts, validation MoE, and analysis-driven fusion components.</em>
