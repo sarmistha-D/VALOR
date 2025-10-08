@@ -58,7 +58,7 @@ VALOR processes multimodal customer support conversations to provide fine-graine
 <div align="center">
   <img src="Conversation.png" alt="Conversation Example" width="700"/>
   <br>
-  <strong>Figure 1: Input-Output Example from CIVIL Dataset</strong><br>
+  <strong>Figure 1: Input-Output Example from CIViL Dataset</strong><br>
   <em>A conversation snippet showing how multimodal input (text + images) is processed by VALOR to predict aspect-severity pairs. The model analyzes both textual complaints and visual evidence to provide fine-grained classification.</em>
 </div>
 
