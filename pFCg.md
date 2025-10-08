@@ -19,7 +19,7 @@ Aspect- Quality ; Severity - Blame
 
 ## Unimodal examples of the CIViL dataset (image-only)
 
-![Only Image annotation](./Only_20Image_annotation.png)
+![Only Image annotation](./Only_Image_annotation.png)
 
 Aspect- Software ; Severity - No Explicit reproach
 
