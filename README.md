@@ -1,3 +1,5 @@
+# Talk, Snap, Complain: Validation-Aware Multimodal Expert Framework for Fine-Grained Customer Grievances
+
 # VALOR: Validation-Aware Learner with Expert Routing [AAAI 2026]
 
 [![Anonymous Repo](https://img.shields.io/badge/Anonymous-Repository-blue.svg)](https://anonymous.4open.science/r/672)
