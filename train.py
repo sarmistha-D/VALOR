@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-VALOR Training Script
+VALOR Training Script is here
 Unified training, hyperparameter tuning, evaluation, and inference for VALOR model
 """
 

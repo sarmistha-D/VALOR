@@ -13,7 +13,7 @@ from typing import Dict, Tuple
 
 def mixup_data(batch: Dict[str, torch.Tensor], alpha: float = 0.2) -> Tuple[Dict[str, torch.Tensor], torch.Tensor]:
     """
-    Applies MixUp augmentation to a batch of data
+    Applies MixUp augmentations to a batch of data
     
     Args:
         batch: Dictionary containing batch data

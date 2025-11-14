@@ -118,7 +118,7 @@ class ValidationAnalysisModule(nn.Module):
         R_avg = self.alignment_analyzer(l_v_1, l_v_2)
         Dominance = self.dominance_analyzer(l_p_a, l_v_a)
         U_avg = self.complementarity_analyzer(l_v_1, l_v_2)
-        
+    
         return {
             'R_avg': R_avg,
             'Dominance': Dominance,

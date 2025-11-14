@@ -13,7 +13,7 @@ class ALBEFBaseline(BaseBaseline):
     """
     ALBEF (Align Before Fuse) baseline
     """
-    
+  
     def __init__(self, device: str = "cuda"):
         super().__init__("ALBEF", device)
         self.hidden_dim = 768  # ALBEF base model hidden dimension

@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from typing import Dict, Any, Optional
 
-# Import VALOR components
+# Importing VALOR components
 from blocks.text_encoder import TextEncoder
 from blocks.image_encoder import ImageEncoder
 from blocks.cross_attention import CrossAttentionFusion

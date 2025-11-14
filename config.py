@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 @dataclass
 class Config:
     """
-    VALOR Configuration - Best architecture from ablation study
+    VALOR Configurations - Best architecture from ablation study
     
     Architecture specifications:
     - expert_type: "cot"
