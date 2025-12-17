@@ -96,6 +96,10 @@ class MixtureOfExperts(nn.Module):
                 # Pass through expert
                 expert_outputs = self.experts[i](expert_inputs)
                 
+                # Failsafe: Ensure expert output is 2D [batch, num_classes]
+                if expert_outputs.dim() == 3:
+                    expert_outputs = expert_outputs.mean(dim=1)
+                
                 # Place outputs in the correct positions
                 logits[mask] = expert_outputs
         

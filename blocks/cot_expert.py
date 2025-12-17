@@ -148,14 +148,20 @@ Reasoning:"""
             # Extract hidden states from the model
             if hasattr(outputs, 'hidden_states') and outputs.hidden_states:
                 # Get last layer, last token hidden states
-                hidden_states = outputs.hidden_states[-1][-1]  # [batch_size, hidden_size]
+                hidden_states = outputs.hidden_states[-1][-1]
+                # Ensure 2D: may be [batch, hidden] or [batch, seq, hidden]
+                while hidden_states.dim() > 2:
+                    hidden_states = hidden_states[:, -1, :]  # Take last token
             else:
                 # Fallback: run forward pass to get hidden states
                 model_outputs = self.model(**inputs, output_hidden_states=True)
                 hidden_states = model_outputs.hidden_states[-1][:, -1, :]
         
+        # Ensure hidden_states matches batch dimension
+        hidden_states = hidden_states[:x.size(0)]
+        
         # Combine projected input with generated hidden states
-        combined = projected + hidden_states[:x.size(0)]  # Ensure batch size matches
+        combined = projected + hidden_states  # Both should be [batch, hidden]
         
         # Classify
         logits = self.classifier(combined)
