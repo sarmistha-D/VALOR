@@ -82,7 +82,7 @@ class VALOR(nn.Module):
         
         # Cross-attention fusion
         self.cross_fusion = CrossAttentionFusion(
-            hidden_dim=encoder_dim,
+            hidden_size=encoder_dim,
             num_heads=8
         )
         
@@ -171,7 +171,9 @@ class VALOR(nn.Module):
         sas_score = self.sas_module(cls_text, cls_image)  # [B]
         
         # Get CLS representation for classification
-        cls_representation = fused  # [B, hidden_dim]
+        # Pool the sequence dimension to get [B, hidden_dim] for MoE
+        # fused is [B, seq_len, hidden_dim], MoE expects [B, hidden_dim]
+        cls_representation = fused.mean(dim=1)  # [B, hidden_dim]
         
         # Pass through Mixture of Experts (CoT)
         aspect_logits, aspect_lb_loss, aspect_gates = self.aspect_moe(cls_representation)

@@ -47,7 +47,7 @@ class MixtureOfExperts(nn.Module):
             CoTExpert(
                 hidden_dim=hidden_dim,
                 num_classes=num_classes,
-                model_name="deepseek-ai/deepseek-coder-6.7b",
+                model_name="deepseek-ai/deepseek-coder-6.7b-instruct",
                 max_tokens=24,
                 temperature=0.5,
                 top_k=30,

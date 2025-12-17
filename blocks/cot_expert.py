@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Dict, Any, List
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import warnings
 
 class CoTExpert(nn.Module):
@@ -29,7 +29,7 @@ class CoTExpert(nn.Module):
         self, 
         hidden_dim: int = 768, 
         num_classes: int = 5,
-        model_name: str = "deepseek-ai/deepseek-coder-6.7b",
+        model_name: str = "deepseek-ai/deepseek-coder-6.7b-instruct",
         max_tokens: int = 24,
         temperature: float = 0.5,
         top_k: int = 30,
@@ -52,10 +52,18 @@ class CoTExpert(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         
         # Load DeepSeek coder model
+        # Use 4-bit quantization for memory efficiency
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+        
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-            device_map="auto" if device == "cuda" else None,
+            quantization_config=quantization_config,
+            device_map="auto",
             trust_remote_code=True
         )
         self.hidden_size = self.model.config.hidden_size
@@ -93,6 +101,9 @@ Reasoning:"""
         """
         # Handle different input shapes
         original_shape = x.shape
+        reshape_output = False
+        seq_len = None
+        
         if len(original_shape) == 3:
             batch_size, seq_len, hidden_dim = original_shape
             # Process each sequence position
@@ -100,7 +111,7 @@ Reasoning:"""
             reshape_output = True
         else:
             batch_size = x.size(0)
-            reshape_output = False
+            # reshape_output = False # Already initialized to False
         
         # Apply expert-specific transformation
         x = x * self.expert_scale + self.expert_bias
@@ -117,7 +128,7 @@ Reasoning:"""
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=512
+            max_length=256
         ).to(self.device)
         
         # Generate reasoning chains
@@ -126,9 +137,10 @@ Reasoning:"""
                 **inputs,
                 max_new_tokens=self.max_tokens,
                 temperature=self.temperature,
-                top_k=self.top_k,
-                top_p=self.top_p,
+                # top_k=self.top_k, # Removed as per instruction
+                top_p=0.9, # Changed from self.top_p to 0.9
                 do_sample=True,
+                pad_token_id=self.tokenizer.eos_token_id, # Added as per instruction
                 return_dict_in_generate=True,
                 output_hidden_states=True
             )
@@ -148,8 +160,8 @@ Reasoning:"""
         # Classify
         logits = self.classifier(combined)
         
-        # Reshape output if needed
-        if reshape_output:
+        # Reshape output if needed (only for 3D inputs)
+        if reshape_output and seq_len is not None:
             logits = logits.view(batch_size, seq_len, -1)
         
         return logits

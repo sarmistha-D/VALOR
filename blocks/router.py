@@ -79,14 +79,28 @@ class Router(nn.Module):
             routing_weights: One-hot expert selection (batch_size, num_experts)
             load_balance_loss: Load balancing loss
         """
+        # Check for NaNs in input
+        if torch.isnan(x).any():
+            # print(f"!!! ROUTER INPUT HAS NaNs !!! Shape: {x.shape}")
+            x = torch.nan_to_num(x, nan=0.0)
+        
         # Get router logits
         router_logits = self.router(x)  # (batch_size, num_experts)
         
         # Add noise for exploration
         noisy_logits = self.add_noise(router_logits)
         
+        if torch.isnan(noisy_logits).any():
+            noisy_logits = torch.nan_to_num(noisy_logits, nan=0.0)
+
         # Get expert index with highest score
         _, indices = noisy_logits.max(dim=1)
+        
+        # Safety clamp for indices
+        if indices.max() >= self.num_experts:
+            indices = torch.clamp(indices, max=self.num_experts-1)
+        if indices.min() < 0:
+            indices = torch.clamp(indices, min=0)
         
         # Create one-hot vectors for each input
         routing_weights = F.one_hot(indices, num_classes=self.num_experts).float()

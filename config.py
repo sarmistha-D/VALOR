@@ -26,7 +26,7 @@ class Config:
     """
     
     # Dataset Configuration
-    dataset_name: str = "CIVil.csv" # local path to the dataset or huggingface dataset name
+    dataset_name: str = "NShreya/civil_aaai" # local path to the dataset or huggingface dataset name
     train_split: float = 0.8
     val_split: float = 0.1    
     test_split: float = 0.1       
@@ -46,7 +46,7 @@ class Config:
     
     # VALOR Architecture - BEST CONFIGURATION (FIXED)
     valor_hidden_dim: int = 768
-    valor_num_experts: int = 4
+    valor_num_experts: int = 2
     valor_freeze_encoders: bool = True
     
     # Expert Configuration (FIXED)
@@ -54,7 +54,7 @@ class Config:
     top_k: int = 2
     
     # CoT Expert Configuration (FIXED)
-    cot_model_name: str = "deepseek-ai/deepseek-coder-6.7b"
+    cot_model_name: str = "deepseek-ai/deepseek-coder-6.7b-instruct"
     cot_temperature: float = 0.5
     cot_top_k: int = 30
     cot_top_p: float = 0.9
@@ -90,7 +90,7 @@ class Config:
     # Validation MoE Configuration (FIXED)
     use_validation_moe: bool = True
     validation_expert_type: str = "transformer"
-    n_validation_experts: int = 2
+    n_validation_experts: int = 1
     validation_dropout: float = 0.1
     
     # Analysis Configuration (NEW)
@@ -115,9 +115,12 @@ class Config:
     baseline_custom_pooling: bool = True  # Whether to use custom pooling for feature extraction
     
     # Training Configuration
-    batch_size: int = 16
+    batch_size: int = 4
+    num_workers: int = 4
+    pin_memory: bool = True
+    gradient_accumulation_steps: int = 10
     num_epochs: int = 50
-    learning_rate: float = 5e-4
+    learning_rate: float = 2e-5
     weight_decay: float = 0.01
     warmup_steps: int = 500
     max_grad_norm: float = 1.0

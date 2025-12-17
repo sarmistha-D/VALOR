@@ -22,7 +22,7 @@ from typing import Dict, Any, Optional
 # Add the project root to the path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from config import Config
+from config import Config, config
 from models.valor import VALOR
 from utils.dataset import load_comp2_dataset, create_dataloaders
 from utils.metrics import compute_metrics

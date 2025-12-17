@@ -346,8 +346,20 @@ def load_comp2_dataset(config, tokenizer, image_transforms):
     
     filtered_data = []
     for item in cleaned_data:
+        # Check if labels are valid and image exists
         if item['aspect'] in valid_aspects and item['severity'] in valid_severities:
-            filtered_data.append(item)
+            # Check for image or image_path
+            has_image = False
+            if 'image_path' in item and item['image_path'] is not None:
+                if isinstance(item['image_path'], str) and not item['image_path'].strip():
+                    has_image = False
+                else:
+                    has_image = True
+            elif 'image' in item and item['image'] is not None:
+                 has_image = True
+            
+            if has_image:
+                filtered_data.append(item)
     
     print(f"\nFiltered to {len(filtered_data)} valid samples")
     

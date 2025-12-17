@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict, Any, Tuple
-from transformers import AutoModel
+from transformers import AutoModel, BitsAndBytesConfig
 from blocks.analysis_modules import ValidationAnalysisModule
 
 class TransformerValidationExpert(nn.Module):
@@ -25,7 +25,7 @@ class TransformerValidationExpert(nn.Module):
     
     def __init__(self, hidden_dim: int = 768, num_classes: int = 5, 
                  expert_id: int = 0,
-                 model_name: str = "deepseek-ai/deepseek-coder-6.7b"):
+                 model_name: str = "deepseek-ai/deepseek-coder-6.7b-instruct"):
         super(TransformerValidationExpert, self).__init__()
         
         self.hidden_dim = hidden_dim
@@ -34,10 +34,17 @@ class TransformerValidationExpert(nn.Module):
         self.model_name = model_name
         
         # Load DeepSeek model for validation
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+        
         self.transformer = AutoModel.from_pretrained(
             model_name,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto" if torch.cuda.is_available() else None,
+            quantization_config=quantization_config,
+            device_map="auto",
             trust_remote_code=True
         )
         
@@ -46,10 +53,11 @@ class TransformerValidationExpert(nn.Module):
             param.requires_grad = False
             
         # Only fine-tune the last few layers
-        for i, layer in enumerate(self.transformer.layers):
-            if i >= len(self.transformer.layers) - 2:  # Only fine-tune last 2 layers
-                for param in layer.parameters():
-                    param.requires_grad = True
+        # Disabled for quantization stability
+        # for i, layer in enumerate(self.transformer.layers):
+        #     if i >= len(self.transformer.layers) - 2:  # Only fine-tune last 2 layers
+        #         for param in layer.parameters():
+        #             param.requires_grad = True
         
         # Get transformer hidden size
         self.transformer_dim = self.transformer.config.hidden_size
@@ -142,7 +150,7 @@ class ValidationMoE(nn.Module):
                 hidden_dim=hidden_dim,
                 num_classes=num_classes,
                 expert_id=i,
-                model_name="deepseek-ai/deepseek-coder-6.7b"
+                model_name="deepseek-ai/deepseek-coder-6.7b-instruct"
             )
             for i in range(num_experts)
         ])

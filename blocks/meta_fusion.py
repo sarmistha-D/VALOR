@@ -154,7 +154,10 @@ class MetaFusionHead(nn.Module):
 
 def create_meta_fusion_head(config, num_classes: int, task_type: str = "aspect") -> MetaFusionHead:
     """Enhanced factory function for meta-fusion heads with analysis support"""
-    
+    if config is None:
+        from config import config as global_config
+        config = global_config
+
     return MetaFusionHead(
         num_classes=num_classes,
         hidden_dim=config.meta_fusion_hidden_dim,

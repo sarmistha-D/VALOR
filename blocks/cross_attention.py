@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional
 
-class CrossAttention(nn.Module):
+class CrossAttentionFusion(nn.Module):
     """Cross-attention module for multimodal fusion between text and image features"""
     
     def __init__(self, hidden_size: int, num_heads: int, dropout: float = 0.1):
@@ -32,18 +32,21 @@ class CrossAttention(nn.Module):
             nn.Linear(hidden_size * 4, hidden_size)
         )
         
-    def forward(self, text_features: torch.Tensor, image_features: torch.Tensor, 
+    def forward(self, text_embeddings: torch.Tensor, image_embeddings: torch.Tensor, 
                 text_mask: Optional[torch.Tensor] = None, image_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Args:
-            text_features: Text features (batch_size, text_seq_len, hidden_size)
-            image_features: Image features (batch_size, image_seq_len, hidden_size)
+            text_embeddings: Text features (batch_size, text_seq_len, hidden_size)
+            image_embeddings: Image features (batch_size, image_seq_len, hidden_size)
             text_mask: Text attention mask (batch_size, text_seq_len)
             image_mask: Image attention mask (batch_size, image_seq_len)
             
         Returns:
             Fused features (batch_size, text_seq_len, hidden_size)
         """
+        text_features = text_embeddings
+        image_features = image_embeddings
+        
         batch_size, text_seq_len, _ = text_features.shape
         _, image_seq_len, _ = image_features.shape
         
