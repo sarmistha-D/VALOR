@@ -30,7 +30,7 @@ class CoTExpert(nn.Module):
         hidden_dim: int = 768, 
         num_classes: int = 5,
         model_name: str = "deepseek-ai/deepseek-coder-6.7b-instruct",
-        max_tokens: int = 24,
+        max_tokens: int = 64,
         temperature: float = 0.5,
         top_k: int = 30,
         top_p: float = 0.9,
@@ -80,13 +80,25 @@ class CoTExpert(nn.Module):
         self.expert_scale = nn.Parameter(torch.ones(1))
         self.expert_bias = nn.Parameter(torch.zeros(hidden_dim))
         
-        # CoT prompt template
-        self.cot_prompt = """Analyze this multimodal input about a customer complaint from text and image. Use Chain of Thought reasoning:
-Step 1: Identify the key features in the input.
-Step 2: Consider what aspect the complaint is about (Software, Hardware, Packaging, Price, Service, or Quality).
-Step 3: Determine the severity level (No Explicit Reproach, Disapproval, Blame, or Accusation).
-Step 4: Make a classification decision based on your reasoning.
-Reasoning:"""
+        # Research-Grade CoT Prompt: Generalized Semantic Rules
+        self.cot_prompt = """You are an expert analyst. Classify the Complaint Aspect and Severity using these Semantic Rules.
+
+1. ASPECT RULES:
+   - Hardware: Physical defects (battery, screen broken, glass, button, overheating).
+   - Software: System issues (iOS, update, app crash, glitch, keyboard bug, wifi).
+   - Service: Interaction issues (staff, store, appointment, wait time, rude).
+   - Packaging: Delivery conditions (box damaged, seal broken, shipping).
+   - Price: Cost complaints (expensive, worth).
+   - Quality: General performance (slow, lag, stuck, freezes, material feel).
+
+2. SEVERITY RULES:
+   - No Explicit Reproach: Factual statements ("It stopped working") or Questions ("How do I fix?"). No anger.
+   - Disapproval: Subjective dissatisfaction ("It's annoying", "I don't like this", "Ridiculous").
+   - Blame: Direct attribution of fault ("Your update broke my phone", "Fix this now").
+   - Accusation: Hostility/Malice ("Scammers", "You guys suck", "Theft", Profanity).
+
+Task: Analyze the inputs and apply these rules.
+Input Conversation:"""
         
     def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """

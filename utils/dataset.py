@@ -340,6 +340,53 @@ def load_comp2_dataset(config, tokenizer, image_transforms):
         data_list, config.aspect_classes, config.severity_classes
     )
     
+    # --- CONVERSATION RECONSTRUCTION START ---
+    print("Reconstructing conversation threads...")
+    # Create ID mapping for fast lookup
+    id_map = {}
+    for item in cleaned_data:
+        if 'tweet_id' in item and item['tweet_id'] is not None:
+            # Handle float/int IDs safely
+            try:
+                tid = str(int(float(item['tweet_id'])))
+                id_map[tid] = item
+            except:
+                pass
+
+    # Augment text with history
+    for item in cleaned_data:
+        if 'in_response_to_tweet_id' in item and item['in_response_to_tweet_id']:
+            history = []
+            current_id = item['in_response_to_tweet_id']
+            depth = 0
+            
+            while depth < 5: # Limit depth
+                try:
+                    str_id = str(int(float(current_id)))
+                except:
+                    break
+                    
+                if str_id in id_map:
+                    parent = id_map[str_id]
+                    # Prepend parent text
+                    user_role = "User" if parent.get('inbound', False) else "Support"
+                    history.insert(0, f"[{user_role}]: {parent['text']}")
+                    
+                    # Move up
+                    current_id = parent.get('in_response_to_tweet_id')
+                    if not current_id:
+                        break
+                    depth += 1
+                else:
+                    break
+            
+            if history:
+                 # Add current text
+                 current_role = "User" if item.get('inbound', False) else "Support"
+                 context_text = "\n".join(history) + f"\n[{current_role}]: {item['text']}"
+                 item['text'] = context_text
+    # --- CONVERSATION RECONSTRUCTION END ---
+    
     # Filter out samples with unknown/cleaned labels
     valid_aspects = set(config.aspect_classes)
     valid_severities = set(config.severity_classes)
