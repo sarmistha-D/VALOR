@@ -71,6 +71,11 @@ class MixtureOfExperts(nn.Module):
         """
         batch_size = x.size(0)
         
+        # Failsafe: Ensure input is 2D [Batch, Hidden]
+        if x.dim() == 3:
+            # print(f"Warning: MoE received 3D input {x.shape}, pooling...")
+            x = x.mean(dim=1)
+        
         # Route input to experts
         routing_weights, load_balance_loss = self.router(x)
         
