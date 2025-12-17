@@ -9,3 +9,4 @@ tqdm
 Pillow
 requests
 huggingface_hub
+optuna
